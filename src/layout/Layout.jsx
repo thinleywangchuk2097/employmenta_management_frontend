@@ -14,9 +14,24 @@ function buildTheme(mode) {
       background: { default: mode === 'light' ? '#f7f8fa' : '#0b0f14' },
     },
     shape: { borderRadius: 10 },
+    typography: {
+      h5: { fontWeight: 600 },
+      subtitle2: { textTransform: 'uppercase', letterSpacing: 0.6 },
+    },
     components: {
+      MuiPaper: {
+        defaultProps: { elevation: 1 },
+        styleOverrides: { root: { borderRadius: 12 } },
+      },
+      MuiCard: {
+        defaultProps: { elevation: 1 },
+        styleOverrides: { root: { borderRadius: 12 } },
+      },
       MuiListItemButton: {
         styleOverrides: { root: { borderRadius: 8, marginInline: 8 } },
+      },
+      MuiAppBar: {
+        styleOverrides: { root: { backdropFilter: 'saturate(180%) blur(6px)' } },
       },
     },
   })
@@ -60,6 +75,9 @@ export default function Layout() {
         </Typography>
       </Toolbar>
       <Divider />
+      <Box sx={{ px: 2, py: 1 }}>
+        <Typography variant="subtitle2" color="text.secondary">Main</Typography>
+      </Box>
       <Box sx={{ flex: 1, py: 1 }}>
         <List>
           {navItems.map((item) => {

@@ -18,6 +18,11 @@ import {
   Tooltip,
   TablePagination,
   Skeleton,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
 } from '@mui/material'
 import { Edit as EditIcon, Delete as DeleteIcon, Add as AddIcon, Search as SearchIcon } from '@mui/icons-material'
 import EmploymentManagementService from '../api/service/EmploymentManagement'
@@ -30,6 +35,8 @@ export default function IndexEmployee() {
   const [query, setQuery] = useState('')
   const [page, setPage] = useState(0)
   const [rowsPerPage, setRowsPerPage] = useState(10)
+  const [confirmOpen, setConfirmOpen] = useState(false)
+  const [targetId, setTargetId] = useState(null)
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase()
@@ -58,10 +65,17 @@ export default function IndexEmployee() {
     load()
   }, [])
 
-  const onDelete = async (id) => {
-    if (!confirm('Delete this employee?')) return
+  const onDelete = (id) => {
+    setTargetId(id)
+    setConfirmOpen(true)
+  }
+
+  const handleConfirmDelete = async () => {
+    if (!targetId) return
     try {
-      await EmploymentManagementService.remove(id)
+      await EmploymentManagementService.remove(targetId)
+      setConfirmOpen(false)
+      setTargetId(null)
       await load()
     } catch (e) {
       alert(e?.message || 'Delete failed')
@@ -166,6 +180,19 @@ export default function IndexEmployee() {
           />
         </Paper>
       )}
+
+      <Dialog open={confirmOpen} onClose={() => setConfirmOpen(false)}>
+        <DialogTitle>Delete Employee</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Are you sure you want to delete this employee? This action cannot be undone.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setConfirmOpen(false)}>Cancel</Button>
+          <Button color="error" variant="contained" onClick={handleConfirmDelete}>Delete</Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   )
 }
