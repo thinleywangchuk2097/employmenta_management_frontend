@@ -23,6 +23,7 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
+  Chip,
 } from '@mui/material'
 import { Edit as EditIcon, Delete as DeleteIcon, Add as AddIcon, Search as SearchIcon } from '@mui/icons-material'
 import EmploymentManagementService from '../api/service/EmploymentManagement'
@@ -95,10 +96,15 @@ export default function IndexEmployee() {
 
   return (
     <Box sx={{ py: 2 }}>
-      <Paper sx={{ p: 2, mb: 2 }}>
+      <Paper sx={{ p: 2, mb: 2 }} elevation={0}>
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems={{ xs: 'stretch', sm: 'center' }} justifyContent="space-between">
-          <Typography variant="h6">Employees</Typography>
-          <Stack direction="row" spacing={1} alignItems="center" sx={{ width: { xs: '100%', sm: 400 } }}>
+          <Stack direction="row" spacing={1} alignItems="center">
+            <Typography variant="h6">Employees</Typography>
+            {rows?.length ? (
+              <Chip size="small" label={`${rows.length}`} color="default" sx={{ ml: 0.5 }} />
+            ) : null}
+          </Stack>
+          <Stack direction="row" spacing={1} alignItems="center" sx={{ width: { xs: '100%', sm: 480 } }}>
             <SearchIcon color="action" />
             <TextField size="small" fullWidth placeholder="Search name, email, company..." value={query} onChange={(e) => setQuery(e.target.value)} />
             <Button variant="contained" startIcon={<AddIcon />} onClick={() => navigate('/employees/new')}>
@@ -118,42 +124,76 @@ export default function IndexEmployee() {
       ) : error ? (
         <Paper sx={{ p: 2, color: 'error.main' }}>{error}</Paper>
       ) : (
-        <Paper>
-          <TableContainer>
-            <Table size="small">
+        <Paper sx={{ overflow: 'hidden' }}>
+          <TableContainer sx={{ maxHeight: 560 }}>
+            <Table size="small" stickyHeader sx={{
+              '& thead th': {
+                fontWeight: 600,
+                backgroundColor: (theme) => theme.palette.mode === 'light' ? '#f6f7f9' : 'rgba(255,255,255,0.04)',
+                color: 'text.primary',
+                borderBottom: '1px solid',
+                borderColor: 'divider',
+                whiteSpace: 'nowrap',
+              },
+              '& tbody tr:hover': {
+                backgroundColor: (theme) => theme.palette.action.hover,
+              },
+              '& tbody td': {
+                borderBottom: '1px solid',
+                borderColor: 'divider',
+              },
+            }}>
               <TableHead>
                 <TableRow>
-                  <TableCell>ID</TableCell>
-                  <TableCell>First Name</TableCell>
-                  <TableCell>Middle Name</TableCell>
-                  <TableCell>Last Name</TableCell>
-                  <TableCell>Designation</TableCell>
-                  <TableCell>Company</TableCell>
-                  <TableCell>Mobile</TableCell>
-                  <TableCell>Email</TableCell>
-                  <TableCell align="right">Actions</TableCell>
+                  <TableCell width={72}>ID</TableCell>
+                  <TableCell width={160}>First Name</TableCell>
+                  <TableCell width={160}>Middle Name</TableCell>
+                  <TableCell width={160}>Last Name</TableCell>
+                  <TableCell width={180}>Designation</TableCell>
+                  <TableCell width={200}>Company</TableCell>
+                  <TableCell width={140}>Mobile</TableCell>
+                  <TableCell width={240}>Email</TableCell>
+                  <TableCell align="right" width={120}>Actions</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
-                {paged.map((r) => (
-                  <TableRow key={r.id} hover>
-                    <TableCell>{r.id}</TableCell>
-                    <TableCell>{r.firstName}</TableCell>
-                    <TableCell>{r.middleName}</TableCell>
-                    <TableCell>{r.lastName}</TableCell>
-                    <TableCell>{r.designation}</TableCell>
-                    <TableCell>{r.companyName}</TableCell>
-                    <TableCell>{r.mobileNo}</TableCell>
-                    <TableCell>{r.emailId}</TableCell>
+                {paged.map((r, idx) => (
+                  <TableRow key={r.id} hover sx={{
+                    backgroundColor: (theme) => idx % 2 === 1 ? (theme.palette.mode === 'light' ? '#fafafa' : 'rgba(255,255,255,0.02)') : 'inherit',
+                  }}>
+                    <TableCell>
+                      <Typography variant="caption" color="text.secondary">#{r.id}</Typography>
+                    </TableCell>
+                    <TableCell>
+                      <Typography variant="body2" fontWeight={500}>{r.firstName}</Typography>
+                    </TableCell>
+                    <TableCell>
+                      <Typography variant="body2">{r.middleName || '-'}</Typography>
+                    </TableCell>
+                    <TableCell>
+                      <Typography variant="body2">{r.lastName}</Typography>
+                    </TableCell>
+                    <TableCell>
+                      <Typography variant="body2">{r.designation || '-'}</Typography>
+                    </TableCell>
+                    <TableCell>
+                      <Typography variant="body2">{r.companyName || '-'}</Typography>
+                    </TableCell>
+                    <TableCell>
+                      <Typography variant="body2">{r.mobileNo || '-'}</Typography>
+                    </TableCell>
+                    <TableCell>
+                      <Typography variant="body2" noWrap>{r.emailId || '-'}</Typography>
+                    </TableCell>
                     <TableCell align="right">
                       <Tooltip title="Edit">
-                        <IconButton color="primary" onClick={() => navigate(`/employees/${r.id}/edit`)}>
-                          <EditIcon />
+                        <IconButton size="small" color="primary" onClick={() => navigate(`/employees/${r.id}/edit`)}>
+                          <EditIcon fontSize="small" />
                         </IconButton>
                       </Tooltip>
                       <Tooltip title="Delete">
-                        <IconButton color="error" onClick={() => onDelete(r.id)}>
-                          <DeleteIcon />
+                        <IconButton size="small" color="error" onClick={() => onDelete(r.id)}>
+                          <DeleteIcon fontSize="small" />
                         </IconButton>
                       </Tooltip>
                     </TableCell>
@@ -161,8 +201,8 @@ export default function IndexEmployee() {
                 ))}
                 {filtered.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={9} align="center">
-                      No employees match your search.
+                    <TableCell colSpan={9} align="center" sx={{ py: 6 }}>
+                      <Typography variant="body2" color="text.secondary">No employees match your search.</Typography>
                     </TableCell>
                   </TableRow>
                 )}
@@ -177,6 +217,7 @@ export default function IndexEmployee() {
             rowsPerPage={rowsPerPage}
             onRowsPerPageChange={handleChangeRowsPerPage}
             rowsPerPageOptions={[5, 10, 25]}
+            sx={{ borderTop: '1px solid', borderColor: 'divider' }}
           />
         </Paper>
       )}
